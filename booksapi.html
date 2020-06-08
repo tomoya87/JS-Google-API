@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>googleBooksAPI</title>
+</head>
+
+<body>
+  <h1>google books API</h1>
+  <button id="btn">データ取得</button>
+  <div id="output"></div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <!-- axiosライブラリの読み込み -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script>
+
+    // リクエストを送るurlを準備
+    const url = 'https://www.googleapis.com/books/v1/volumes?q=intitle:html';
+
+    // ボタンクリック時にデータを取得しよう
+    $('#btn').on('click', function () {
+      // ここにデータを取得する処理を記述
+      axios.get(url)
+        .then(function (response) {
+          console.log(response);
+          console.log(response.data.items[0].volumeInfo.title);
+          console.log(response.data.items[0].volumeInfo.imageLinks.smallThumbnail);
+          let str = '';
+          for (let i = 0; i < response.data.items.length; i++) {
+            //   // console.log(response.data.items[i].volumeInfo.title)
+            str += '<P>' + response.data.items[i].volumeInfo.title + '</p>';
+            str += '<img src="' + response.data.items[i].volumeInfo.imageLinks.smallThumbnail + '"alt="" >'
+          }
+          // for (let e = 0; e < response.data.items[e].volumeInfo.imageLinks.smallThumbnail.length; i++) {
+
+          // }
+          $('#output').html(str);
+          // $('#output').html(mmm);
+
+        }).catch(function (error) {
+          console.log(error);
+        }).finally(function () {
+          console.log('done!');
+        });
+    });
+
+  </script>
+</body>
+
+</html>

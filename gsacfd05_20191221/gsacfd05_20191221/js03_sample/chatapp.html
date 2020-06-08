@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>chatApp</title>
+  <style>
+    #output div {
+      background: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>realtime chat</h1>
+  <!-- 入力&出力場所を作成しよう -->
+  <div>
+    <div>name<input type="text" id="name">
+    </div>
+    <div>
+      <textarea name="" id="text" cols="30" rows="10"></textarea>
+      <button id="send">送信</button>
+    </div>
+    <div id="output"></div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <!-- 以下にfirebaseのコードを貼り付けよう -->
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase.js"></script>
+
+  <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+  <script src="https://www.gstatic.com/firebasejs/7.6.1/firebase-analytics.js"></script>
+
+  <script>
+    // Your web app's Firebase configuration
+
+    var firebaseConfig = {
+      apiKey: "AIzaSyCzK29TFcYWajZyAwopKtaoOPMLUKENV24",
+      authDomain: "chat20191221.firebaseapp.com",
+      databaseURL: "https://chat20191221.firebaseio.com",
+      projectId: "chat20191221",
+      storageBucket: "chat20191221.appspot.com",
+      messagingSenderId: "286517540531",
+      appId: "1:286517540531:web:3ff1a028312a35a29b62c6",
+      measurementId: "G-D5FVSLMBHJ"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    const db = firebase.firestore().collection('chat');
+  </script>
+
+  <script>
+    // 日時をいい感じの形式にする関数
+    function convertTimestampToDatetime(timestamp) {
+      const date = new Date(timestamp * 1000);
+      const year = date.getFullYear();
+      const month = ('0' + (date.getMonth() + 1)).slice(-2);
+      const day = ('0' + date.getDate()).slice(-2);
+      const hour = ('0' + date.getHours()).slice(-2);
+      const min = ('0' + date.getMinutes()).slice(-2);
+      const sec = ('0' + date.getSeconds()).slice(-2);
+      return `${year}-${month}-${day} ${hour}:${min}:${sec}`
+    }
+
+    // 送信ボタンクリック時にデータを送信する処理
+    $("#send").on("click", function () {
+      // alert('ok');
+      const data = {
+        name: $('#name').val(),
+        text: $('#text').val(),
+        time: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+      db.add(data);
+      $('#text').val('');
+    });
+    $('#text').on('keydown', function (e) {
+      // alert('ok');
+      if (e.keyCode == 13) {
+        const data = {
+          name: $('#name').val(),
+          text: $('#text').val(),
+          time: firebase.firestore.FieldValue.serverTimestamp(),
+        };
+        db.add(data);
+        $('#text').val('');
+      }
+    });
+
+
+
+
+    // データをリアルタイムに取得する処理
+    db.orderBy('time', 'desc').onSnapshot(function (querySnapshot) {
+      console.log(querySnapshot.docs);
+      let str = '';
+      querySnapshot.docs.forEach(function (doc) {
+        // console.log(doc.id);
+        // console.log(doc.data());
+        const id = doc.id;
+        const data = doc.data();
+        str += '<div id="' + id + '">';
+        str += '<p>' + data.name + '</p>';
+        str += '<p>' + data.text + '</p>';
+        str += '<p>' + convertTimestampToDatetime(data.time.seconds) + '</p>';
+        str += '</div>';
+        // console.log(str);
+
+        $('#output').html(str);
+
+      });
+    });
+
+  </script>
+</body>
+
+</html>
